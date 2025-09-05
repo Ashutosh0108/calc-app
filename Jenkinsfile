@@ -17,13 +17,13 @@ pipeline {
             steps {
                 script {
                     // Create virtual environment
-                    sh 'python -m venv ${VENV_DIR}'
-                    // Activate venv and upgrade pip
-                    sh '''
-                    source ${VENV_DIR}/bin/activate
-                    pip install --upgrade pip
-                    pip install -r requirements.txt || true
-                    '''
+                    bat "python -m venv %VENV_DIR%"
+                    // Activate venv and install dependencies
+                    bat """
+                    call %VENV_DIR%\\Scripts\\activate.bat
+                    python -m pip install --upgrade pip
+                    python -m pip install -r requirements.txt || exit 0
+                    """
                 }
             }
         }
@@ -32,10 +32,10 @@ pipeline {
             steps {
                 script {
                     // Activate venv and run tests
-                    sh '''
-                    source ${VENV_DIR}/bin/activate
+                    bat """
+                    call %VENV_DIR%\\Scripts\\activate.bat
                     python -m unittest discover -s tests
-                    '''
+                    """
                 }
             }
         }
@@ -50,7 +50,7 @@ pipeline {
     post {
         always {
             echo 'Cleaning up...'
-            sh "rm -rf ${VENV_DIR}"
+            bat "rmdir /s /q %VENV_DIR%"
         }
         success {
             echo 'Pipeline completed successfully!'
